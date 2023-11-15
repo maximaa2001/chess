@@ -1,0 +1,11 @@
+.activeMenuItem {
+    -fx-background-color: #DC143C;
+}
+
+.errorText {
+    -fx-text-fill: red;
+}
+
+.successText {
+    -fx-text-fill: #04c604;
+}
