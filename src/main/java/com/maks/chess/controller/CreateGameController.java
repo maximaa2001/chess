@@ -2,8 +2,8 @@ package com.maks.chess.controller;
 
 import com.maks.chess.model.socket.DefaultSocketStore;
 import com.maks.chess.model.socket.SocketStore;
-import com.maks.chess.service.socket.ConnectionThread;
-import com.maks.chess.service.socket.ServerSocketCallable;
+import com.maks.chess.service.thread.WaitingConnectionThread;
+import com.maks.chess.service.thread.ServerSocketCallable;
 import com.maks.chess.view.CreateGameView;
 import com.maks.chess.view.View;
 import com.maks.chess.view.ViewFactory;
@@ -52,7 +52,7 @@ public class CreateGameController implements Controller {
     private final MouseEventHandler mouseEventHandler = new MouseEventHandler();
 
     private ServerSocketCallable serverSocketCallable;
-    private ConnectionThread connectionThread;
+    private WaitingConnectionThread waitingConnectionThread;
     private final SocketStore socketStore;
 
 
@@ -69,8 +69,7 @@ public class CreateGameController implements Controller {
         cancelButton.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandler);
     }
 
-    public class KeyboardEventHandler implements EventHandler<KeyEvent> {
-
+    private class KeyboardEventHandler implements EventHandler<KeyEvent> {
         @Override
         public void handle(KeyEvent keyEvent) {
             if (keyEvent.getCode() == KeyCode.ESCAPE) {
@@ -81,7 +80,7 @@ public class CreateGameController implements Controller {
         }
     }
 
-    public class MouseEventHandler implements EventHandler<MouseEvent> {
+    private class MouseEventHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent mouseEvent) {
             if (mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
@@ -100,11 +99,14 @@ public class CreateGameController implements Controller {
                         ExecutorService executorService = Executors.newSingleThreadExecutor();
                         serverSocketCallable = new ServerSocketCallable(portNumber);
                         Future<Socket> futureSocket = executorService.submit(serverSocketCallable);
-                        connectionThread = new ConnectionThread(futureSocket, (error) -> {
+                        waitingConnectionThread = new WaitingConnectionThread(futureSocket, (error) -> {
                             createGameView.setErrorText(error);
                             closeOpenConnection();
-                        }, () -> ViewFactory.transition(View.BOARD, createGameView.getStage()));
-                        connectionThread.start();
+                        }, () -> {
+                            createGameView.removeKeyHandler(keyboardEventHandler);
+                            ViewFactory.transition(View.BOARD, createGameView.getStage());
+                        });
+                        waitingConnectionThread.start();
                         executorService.shutdown();
                         createGameView.setSuccessText("Ожидание подключения второго игрока");
                         createGameView.disableCancelButton(false);

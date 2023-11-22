@@ -1,4 +1,4 @@
-package com.maks.chess.service.socket;
+package com.maks.chess.service.thread;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -26,7 +26,6 @@ public class ServerSocketCallable implements Callable<Socket> {
             serverSocket.close();
         } catch (IOException e) {
             System.out.println(e.getMessage());
-            e.printStackTrace();
         }
     }
 

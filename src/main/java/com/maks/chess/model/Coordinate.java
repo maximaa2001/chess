@@ -1,10 +1,11 @@
 package com.maks.chess.model;
 
 
+import java.io.Serializable;
 import java.util.Objects;
 
 
-public class Coordinate {
+public class Coordinate implements Serializable {
     private Integer row;
     private Integer column;
 
@@ -39,5 +40,13 @@ public class Coordinate {
     @Override
     public int hashCode() {
         return Objects.hash(row, column);
+    }
+
+    @Override
+    public String toString() {
+        return "Coordinate{" +
+                "row=" + row +
+                ", column=" + column +
+                '}';
     }
 }

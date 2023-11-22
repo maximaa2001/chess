@@ -11,6 +11,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
@@ -40,6 +42,7 @@ public class ConnectGameController implements Controller {
     private Label messageLabel;
 
     private final ConnectGameView connectGameView;
+    private final KeyboardEventHandler keyboardEventHandler = new KeyboardEventHandler();
     private final MouseEventHandler mouseEventHandler = new MouseEventHandler();
 
     public ConnectGameController(ConnectGameView connectGameView) {
@@ -49,10 +52,11 @@ public class ConnectGameController implements Controller {
     @FXML
     void initialize() {
         connectGameView.initElements(List.of(mainLabel, messageLabel), connectBtn, addressInput);
+        connectGameView.addKeyHandler(keyboardEventHandler);
         connectBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandler);
     }
 
-    public class MouseEventHandler implements EventHandler<MouseEvent> {
+    private class MouseEventHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent mouseEvent) {
             if (mouseEvent.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
@@ -67,6 +71,7 @@ public class ConnectGameController implements Controller {
                             Socket socket = new Socket(split[0], Integer.parseInt(split[1]));
                             DataStoreFactory.getDataStore().setColor(GamerColor.BLACK);
                             SocketStoreFactory.getSocketFactory().saveSocket(socket);
+                            connectGameView.removeKeyHandler(keyboardEventHandler);
                             ViewFactory.transition(View.BOARD, connectGameView.getStage());
                         } catch (UnknownHostException e) {
                             connectGameView.setErrorText("Введите корректный ip адрес и порт");
@@ -80,34 +85,13 @@ public class ConnectGameController implements Controller {
 
     }
 
-    private boolean isValidAddress(String address) {
-        String[] split = address.split(":");
-        if (split.length != 2) {
-            return false;
-        } else {
-            String[] ip = split[0].split("\\.");
-            if (ip.length != 4) {
-                return false;
+    private class KeyboardEventHandler implements EventHandler<KeyEvent> {
+        @Override
+        public void handle(KeyEvent keyEvent) {
+            if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                connectGameView.removeKeyHandler(keyboardEventHandler);
+                ViewFactory.transition(View.MENU, connectGameView.getStage());
             }
-            for (String number : ip) {
-                try {
-                    int i = Integer.parseInt(number);
-                    if (i < 0 || i > 255) {
-                        return false;
-                    }
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-            }
-            try {
-                int i = Integer.parseInt(split[1]);
-                if (i < 0 || i > 65535) {
-                    return false;
-                }
-            } catch (NumberFormatException e) {
-                return false;
-            }
-            return true;
         }
     }
 }

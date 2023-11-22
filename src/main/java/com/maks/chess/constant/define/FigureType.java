@@ -41,14 +41,14 @@ public enum FigureType {
         @Override
         public List<Coordinate> getDefaultStartCoordinate() {
             final int row = AppConstant.BOARD_SIDE_SIZE - 1;
-            return List.of(new Coordinate(row, AppConstant.BOARD_SIDE_SIZE - 4));
+            return List.of(new Coordinate(row, 3));
         }
     },
     KING {
         @Override
         public List<Coordinate> getDefaultStartCoordinate() {
             final int row = AppConstant.BOARD_SIDE_SIZE - 1;
-            return List.of(new Coordinate(row, 3));
+            return List.of(new Coordinate(row, 4));
         }
     };
 

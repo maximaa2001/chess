@@ -17,9 +17,30 @@ public class StartPositionFigureInitializer implements FigureInitializer {
         FigureFactory figureFactory = FigureFactoryCreator.createFigureFactory(color);
         FigureType[] allTypes = FigureType.values();
         for (FigureType type : allTypes) {
-            List<Coordinate> defaultStartCoordinates = type.getDefaultStartCoordinate();
+            List<Coordinate> defaultStartCoordinates = null;
+            if (type.equals(FigureType.QUEEN) || type.equals(FigureType.KING)) {
+                defaultStartCoordinates = List.of(customBehavior(type, color));
+            } else {
+                defaultStartCoordinates = type.getDefaultStartCoordinate();
+            }
             figures.addAll(figureFactory.createFigures(type, defaultStartCoordinates));
         }
         return figures;
+    }
+
+    private Coordinate customBehavior(FigureType type, GamerColor color) {
+        Coordinate coordinates = null;
+        if (type.equals(FigureType.QUEEN)) {
+            coordinates = type.getDefaultStartCoordinate().get(0);
+            if (color.equals(GamerColor.BLACK)) {
+                coordinates.setColumn(coordinates.getColumn() + 1);
+            }
+        } else if (type.equals(FigureType.KING)) {
+            coordinates = type.getDefaultStartCoordinate().get(0);
+            if (color.equals(GamerColor.BLACK)) {
+                coordinates.setColumn(coordinates.getColumn() - 1);
+            }
+        }
+        return coordinates;
     }
 }

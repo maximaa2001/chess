@@ -15,7 +15,7 @@ import java.net.URL;
 public class ImageViewCreator {
     private static final URL PATH = MainApplication.class.getResource(AppConstant.WHITE_AND_BLACK_FIGURES_FILE_NAME);
 
-    public static ImageView createImageViewResolver(FigureType type, GamerColor color) {
+    public static ImageView createImageView(FigureType type, GamerColor color) {
         ImageView imageView = null;
         try {
             imageView = new ImageView(new Image(new FileInputStream(PATH.getPath())));

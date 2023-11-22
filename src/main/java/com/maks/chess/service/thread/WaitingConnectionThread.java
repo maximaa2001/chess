@@ -1,4 +1,4 @@
-package com.maks.chess.service.socket;
+package com.maks.chess.service.thread;
 
 import com.maks.chess.constant.define.GamerColor;
 import com.maks.chess.model.data.DataStoreFactory;
@@ -11,15 +11,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-public class ConnectionThread extends Thread {
+public class WaitingConnectionThread extends Thread {
     private final Future<Socket> futureSocket;
 
     private final Consumer<String> acceptTimeoutHandler;
     private final VoidSmth successfullyConnectionHandler;
 
-    public ConnectionThread(Future<Socket> futureSocket,
-                            Consumer<String> acceptTimeoutHandler,
-                            VoidSmth successfullyConnectionHandler) {
+    public WaitingConnectionThread(Future<Socket> futureSocket,
+                                   Consumer<String> acceptTimeoutHandler,
+                                   VoidSmth successfullyConnectionHandler) {
         this.futureSocket = futureSocket;
         this.acceptTimeoutHandler = acceptTimeoutHandler;
         this.successfullyConnectionHandler = successfullyConnectionHandler;
