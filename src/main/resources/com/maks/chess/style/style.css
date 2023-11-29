@@ -9,3 +9,11 @@
 .successText {
     -fx-text-fill: #04c604;
 }
+
+.youLog {
+    -fx-text-fill: #039636;
+}
+
+.enemyLog {
+    -fx-text-fill: #D82700;
+}

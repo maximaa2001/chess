@@ -8,20 +8,20 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane prefHeight="800.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ImageView fitHeight="800.0" fitWidth="1000.0" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ImageView fitHeight="800.0" fitWidth="1300.0" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@image/background.jpg" />
          </image>
       </ImageView>
-       <Label fx:id="mainLabel" layoutX="366.0" layoutY="34.0" stylesheets="@style/style.css" text="Найти игру" textFill="WHITE">
+       <Label fx:id="mainLabel" alignment="CENTER" layoutX="566.0" layoutY="38.0" stylesheets="@style/style.css" text="Найти игру" textFill="WHITE">
            <font>
                <Font size="45.0" />
            </font>
        </Label>
-       <TextField fx:id="addressInput" layoutX="321.0" layoutY="110.0" prefHeight="39.0" prefWidth="314.0" promptText="Адресс" />
-      <Button fx:id="connectBtn" layoutX="664.0" layoutY="110.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="148.0" stylesheets="@style/style.css" text="Подключиться" />
+       <TextField fx:id="addressInput" layoutX="439.0" layoutY="110.0" prefHeight="39.0" prefWidth="314.0" promptText="Адресс" />
+      <Button fx:id="connectBtn" layoutX="776.0" layoutY="110.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="148.0" stylesheets="@style/style.css" text="Подключиться" />
       <Label fx:id="messageLabel" layoutX="292.0" layoutY="149.0" prefHeight="16.0" prefWidth="314.0" stylesheets="@style/style.css" />
    </children>
 </AnchorPane>

@@ -5,11 +5,11 @@ import com.maks.chess.constant.define.FigureType;
 import com.maks.chess.constant.define.GamerColor;
 import com.maks.chess.model.ChessModel;
 import com.maks.chess.model.Coordinate;
-import com.maks.chess.model.data.DataStoreFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class King extends Figure {
@@ -31,10 +31,10 @@ public class King extends Figure {
     }
 
     @Override
-    public List<Coordinate> checkPossibilityEat(ChessModel chessModel, Coordinate from) {
+    public List<Coordinate> checkPossibilityEat(ChessModel chessModel, Coordinate from, GamerColor colorToEat) {
         List<Coordinate> possibleMoves = new ArrayList<>();
         Arrays.stream(Direction.values())
-                .forEach(e -> checkEatingDirection(from, e.getROW_CHANGER(), e.getCOLUMN_CHANGER(), possibleMoves, chessModel));
+                .forEach(e -> checkEatingDirection(from, e.getROW_CHANGER(), e.getCOLUMN_CHANGER(), possibleMoves, chessModel, colorToEat));
         return possibleMoves;
     }
 
@@ -55,16 +55,23 @@ public class King extends Figure {
     @Override
     protected void checkEatingDirection(Coordinate from, Function<Integer, Integer> rowChanger,
                                         Function<Integer, Integer> columnChanger,
-                                        List<Coordinate> possibleMoves, ChessModel chessModel) {
+                                        List<Coordinate> possibleMoves, ChessModel chessModel, GamerColor colorToEat) {
         int row = rowChanger.apply(from.getRow());
         int column = columnChanger.apply(from.getColumn());
         if (row >= 0 && row < AppConstant.BOARD_SIDE_SIZE && column >= 0 && column < AppConstant.BOARD_SIDE_SIZE) {
             Coordinate possibleCoordinate = new Coordinate(row, column);
             Figure figureOnPossibleCoordinate = chessModel.getByCoordinate(possibleCoordinate);
-            if (figureOnPossibleCoordinate != null && !figureOnPossibleCoordinate.getColor().equals(DataStoreFactory.getDataStore().getColor())) {
+            if (figureOnPossibleCoordinate != null && figureOnPossibleCoordinate.getColor().equals(colorToEat)) {
                 possibleMoves.add(possibleCoordinate);
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof King king)) return false;
+        return color == king.color && Objects.equals(startCoordinate, king.startCoordinate);
     }
 
     private enum Direction {

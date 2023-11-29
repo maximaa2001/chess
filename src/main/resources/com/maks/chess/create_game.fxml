@@ -8,21 +8,21 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ImageView fitHeight="800.0" fitWidth="1000.0" pickOnBounds="true">
+      <ImageView fitHeight="800.0" fitWidth="1300.0" pickOnBounds="true">
          <image>
             <Image url="@image/background.jpg" />
          </image>
       </ImageView>
-      <Label fx:id="mainLabel" layoutX="320.0" layoutY="31.0" text="Создание игры" textFill="WHITE">
+      <Label fx:id="mainLabel" layoutX="520.0" layoutY="38.0" text="Создание игры" textFill="WHITE">
          <font>
             <Font size="45.0" />
          </font>
       </Label>
-      <TextField fx:id="portInput" layoutX="292.0" layoutY="110.0" prefHeight="39.0" prefWidth="133.0" promptText="Порт" />
-      <Button fx:id="createButton" layoutX="456.0" layoutY="114.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="88.0" stylesheets="@style/style.css" text="Создать" />
-      <Button fx:id="cancelButton" layoutX="592.0" layoutY="114.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="88.0" stylesheets="@style/style.css" text="Отменить" />
-      <Label fx:id="messageLabel" layoutX="292.0" layoutY="169.0" prefHeight="25.0" prefWidth="318.0" stylesheets="@style/style.css"/>
+      <TextField fx:id="portInput" layoutX="477.0" layoutY="107.0" prefHeight="39.0" prefWidth="133.0" promptText="Порт" />
+      <Button fx:id="createButton" layoutX="675.0" layoutY="110.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="88.0" stylesheets="@style/style.css" text="Создать" />
+      <Button fx:id="cancelButton" layoutX="813.0" layoutY="110.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="88.0" stylesheets="@style/style.css" text="Отменить" />
+      <Label fx:id="messageLabel" layoutX="560.0" layoutY="158.0" prefHeight="25.0" prefWidth="318.0" stylesheets="@style/style.css" />
    </children>
 </AnchorPane>

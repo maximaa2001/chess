@@ -49,18 +49,26 @@ public class BoardView extends AbstractView {
         cells[row][column].getChildren().add(imageView);
     }
 
+    public ImageView takeFrom(Coordinate from) {
+        ImageView fromImage = resolveImageView(from.getRow(), from.getColumn());
+        cells[from.getRow()][from.getColumn()].getChildren().remove(fromImage);
+        return fromImage;
+    }
+
     public void move(Coordinate from, Coordinate to) {
-        ImageView imageView = resolveImageView(from.getRow(), from.getColumn());
-        cells[from.getRow()][from.getColumn()].getChildren().remove(imageView);
-        placeOn(imageView, to);
+        ImageView fromImage = takeFrom(from);
+        placeOn(fromImage, to);
     }
 
     public void eat(Coordinate from, Coordinate to) {
-        ImageView fromImage = resolveImageView(from.getRow(), from.getColumn());
-        ImageView toImage = resolveImageView(to.getRow(), to.getColumn());
-        cells[from.getRow()][from.getColumn()].getChildren().remove(fromImage);
-        cells[to.getRow()][to.getColumn()].getChildren().remove(toImage);
+        ImageView fromImage = takeFrom(from);
+        takeFrom(to);
         placeOn(fromImage, to);
+    }
+
+    public void changeOn(ImageView newImageView, Coordinate from) {
+        takeFrom(from);
+        placeOn(newImageView, from);
     }
 
 

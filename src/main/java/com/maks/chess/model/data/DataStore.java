@@ -9,5 +9,7 @@ public interface DataStore {
     Socket getSocket();
     void setColor(GamerColor gamerColor);
     GamerColor getColor();
+    void setKingInDanger(boolean kingInDanger);
+    boolean getKingInDanger();
 
 }

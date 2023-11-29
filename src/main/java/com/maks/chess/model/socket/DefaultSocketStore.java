@@ -1,12 +1,8 @@
 package com.maks.chess.model.socket;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.Socket;
 
 public class DefaultSocketStore implements SocketStore {
-    private static final Logger logger = LoggerFactory.getLogger(DefaultSocketStore.class);
     private static SocketStore socketStore;
     private Socket socket;
 
@@ -22,7 +18,6 @@ public class DefaultSocketStore implements SocketStore {
 
     @Override
     public void saveSocket(Socket socket) {
-        logger.debug("saved socket");
         this.socket = socket;
     }
 

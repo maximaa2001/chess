@@ -8,6 +8,7 @@ import com.maks.chess.model.Coordinate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class Bishop extends Figure {
@@ -30,11 +31,18 @@ public class Bishop extends Figure {
     }
 
     @Override
-    public List<Coordinate> checkPossibilityEat(ChessModel chessModel, Coordinate from) {
+    public List<Coordinate> checkPossibilityEat(ChessModel chessModel, Coordinate from, GamerColor colorToEat) {
         List<Coordinate> possibleMoves = new ArrayList<>();
         Arrays.stream(Direction.values())
-                .forEach(e -> checkEatingDirection(from, e.getROW_CHANGER(), e.getCOLUMN_CHANGER(), possibleMoves, chessModel));
+                .forEach(e -> checkEatingDirection(from, e.getROW_CHANGER(), e.getCOLUMN_CHANGER(), possibleMoves, chessModel, colorToEat));
         return possibleMoves;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Bishop bishop)) return false;
+        return color == bishop.color && Objects.equals(startCoordinate, bishop.startCoordinate);
     }
 
     private enum Direction {
