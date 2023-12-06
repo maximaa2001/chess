@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class King extends Figure {
+    private boolean moved = false;
     public King(GamerColor color, Coordinate coordinate) {
         super(color, coordinate);
     }
@@ -74,6 +75,13 @@ public class King extends Figure {
         return color == king.color && Objects.equals(startCoordinate, king.startCoordinate);
     }
 
+    public void setMovedFlag() {
+        this.moved = true;
+    }
+
+    public boolean isMoved() {
+        return moved;
+    }
     private enum Direction {
         LEFT((row) -> row, (column) -> --column),
         RIGHT((row) -> row, (column) -> ++column),

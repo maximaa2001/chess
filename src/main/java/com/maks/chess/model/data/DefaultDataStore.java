@@ -10,7 +10,6 @@ public class DefaultDataStore implements DataStore {
     private static DataStore dataStore;
     private final SocketStore socketStore;
     private GamerColor gamerColor;
-    private boolean kingInDanger = false;
 
     public static DataStore getDataStore() {
         if (dataStore == null) {
@@ -41,16 +40,6 @@ public class DefaultDataStore implements DataStore {
     @Override
     public GamerColor getColor() {
         return gamerColor;
-    }
-
-    @Override
-    public void setKingInDanger(boolean kingInDanger) {
-        this.kingInDanger = kingInDanger;
-    }
-
-    @Override
-    public boolean getKingInDanger() {
-        return kingInDanger;
     }
 
 }

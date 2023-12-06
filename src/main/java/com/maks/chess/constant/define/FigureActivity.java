@@ -8,7 +8,8 @@ import java.util.Arrays;
 public enum FigureActivity implements Serializable {
     CHOOSE(Paint.valueOf("#FFF360")),
     MOVE(Paint.valueOf("#ABF7A3")),
-    EAT(Paint.valueOf("red"));
+    EAT(Paint.valueOf("red")),
+    CASTLING(Paint.valueOf("22FFFC"));
 
     FigureActivity(Paint cellColor) {
         this.cellColor = cellColor;

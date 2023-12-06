@@ -22,6 +22,6 @@
        </Label>
        <TextField fx:id="addressInput" layoutX="439.0" layoutY="110.0" prefHeight="39.0" prefWidth="314.0" promptText="Адресс" />
       <Button fx:id="connectBtn" layoutX="776.0" layoutY="110.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="148.0" stylesheets="@style/style.css" text="Подключиться" />
-      <Label fx:id="messageLabel" layoutX="292.0" layoutY="149.0" prefHeight="16.0" prefWidth="314.0" stylesheets="@style/style.css" />
+      <Label fx:id="messageLabel" layoutX="439.0" layoutY="149.0" prefHeight="16.0" prefWidth="314.0" stylesheets="@style/style.css" />
    </children>
 </AnchorPane>

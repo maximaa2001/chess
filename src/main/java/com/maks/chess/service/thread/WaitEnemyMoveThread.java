@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.util.function.Consumer;
 
 public class WaitEnemyMoveThread extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(WaitEnemyMoveThread.class);
     private final SocketWrapper socketWrapper;
     private final Consumer<MoveDto> moveDtoConsumer;
 
@@ -20,7 +19,6 @@ public class WaitEnemyMoveThread extends Thread {
     @Override
     public void run() {
         MoveDto moveDto = socketWrapper.readMove();
-        logger.debug("got moveDto {}", moveDto);
         if (moveDto != null) {
             moveDtoConsumer.accept(moveDto);
         }

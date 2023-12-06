@@ -1,64 +1,63 @@
 package com.maks.chess.model;
 
-import com.maks.chess.constant.define.FigureActivity;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class MoveDto implements Serializable {
-    private final Coordinate from;
-    private final Coordinate to;
-    private final FigureActivity activity;
-    private final boolean kingInDanger;
-    private final PawnEvolutionDto pawnEvolutionDto;
+    private final Move move;
+    private final Castling castling;
+    private final PawnEvolution pawnEvolution;
     private final List<String> logs;
+    private final Boolean endGame;
 
-    public MoveDto(Coordinate from, Coordinate to, FigureActivity activity, boolean kingInDanger,
-                   PawnEvolutionDto pawnEvolutionDto, List<String> logs) {
-        this.from = from;
-        this.to = to;
-        this.activity = activity;
-        this.kingInDanger = kingInDanger;
-        this.pawnEvolutionDto = pawnEvolutionDto;
+    public MoveDto(Move move, PawnEvolution pawnEvolution, Castling castling, List<String> logs, Boolean endGame) {
+        this.move = move;
+        this.castling = castling;
+        this.pawnEvolution = pawnEvolution;
         this.logs = logs;
+        this.endGame = endGame;
     }
 
-    public MoveDto(Coordinate from, Coordinate to, FigureActivity activity, boolean kingInDanger, List<String> logs) {
-        this(from, to, activity, kingInDanger, null, logs);
+    public MoveDto(Move move, List<String> logs) {
+        this(move, null, null, logs, false);
     }
 
-    public Coordinate getFrom() {
-        return from;
+    public MoveDto(Castling castling, List<String> logs) {
+        this(null, null, castling, logs, false);
     }
 
-
-    public Coordinate getTo() {
-        return to;
+    public MoveDto(String losingLog) {
+        this(null, null, null, List.of(losingLog), true);
     }
 
-    public FigureActivity getActivity() {
-        return activity;
+    public Move getMove() {
+        return move;
     }
 
-    public Boolean getKingInDanger() {
-        return kingInDanger;
+    public Castling getCastling() {
+        return castling;
     }
 
-    public PawnEvolutionDto getPawnEvolutionDto() {
-        return pawnEvolutionDto;
+    public PawnEvolution getPawnEvolutionDto() {
+        return pawnEvolution;
     }
 
     public List<String> getLogs() {
         return logs;
     }
 
+    public Boolean getEndGame() {
+        return endGame;
+    }
+
     @Override
     public String toString() {
         return "MoveDto{" +
-                "from=" + from +
-                ", to=" + to +
-                ", activity=" + activity +
-                ", kingInDanger=" + kingInDanger +
+                "move=" + move +
+                ", castling=" + castling +
+                ", pawnEvolution=" + pawnEvolution +
+                ", logs=" + logs +
+                ", endGame=" + endGame +
                 '}';
     }
 }

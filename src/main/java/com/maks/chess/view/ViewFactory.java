@@ -1,6 +1,6 @@
 package com.maks.chess.view;
 
-import javafx.application.Platform;
+import com.maks.chess.util.AppUtils;
 import javafx.stage.Stage;
 
 import java.lang.reflect.Constructor;
@@ -8,7 +8,7 @@ import java.lang.reflect.Constructor;
 public final class ViewFactory {
 
     public static void transition(View view, Stage stage) {
-        Platform.runLater(() -> {
+        AppUtils.executeGui(() -> {
             Class<? extends AbstractView> clazz = view.getClazz();
             Constructor<?> declaredConstructor = clazz.getDeclaredConstructors()[0];
             try {

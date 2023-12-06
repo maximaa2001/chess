@@ -16,7 +16,6 @@ public class ChooseFigureDialog {
         availableFigures.put(FigureType.KNIGHT, "Конь");
         availableFigures.put(FigureType.BISHOP, "Слон");
         availableFigures.put(FigureType.QUEEN, "Ферзь");
-
     }
 
     public ChooseFigureDialog() {

@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class Castle extends Figure {
+    private boolean moved = false;
 
     public Castle(GamerColor color, Coordinate coordinate) {
         super(color, coordinate);
@@ -43,6 +44,14 @@ public class Castle extends Figure {
         if (this == o) return true;
         if (!(o instanceof Castle castle)) return false;
         return color == castle.color && Objects.equals(startCoordinate, castle.startCoordinate);
+    }
+
+    public void setMovedFlag() {
+        this.moved = true;
+    }
+
+    public boolean isMoved() {
+        return moved;
     }
 
     private enum Direction {

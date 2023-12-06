@@ -8,12 +8,16 @@ import com.maks.chess.controller.BoardController;
 import com.maks.chess.controller.Controller;
 import com.maks.chess.model.Coordinate;
 import com.maks.chess.util.AppUtils;
+import com.maks.chess.util.Timer;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
@@ -24,21 +28,36 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-public class BoardView extends AbstractView {
+public class BoardView extends AbstractView implements Timer {
     private static final URL FXML = MainApplication.class.getResource(ViewConstant.BOARD);
     private static final String LIGHT_COLOR = "#FFFFFF";
     private static final String DARK_COLOR = "#5b5b5b";
 
     private GridPane gridPane;
+    private HBox hBox;
+    private Label moveLabel;
+    private Label timeLabel;
+    private Button giveUpBtn;
+    private Button menuBtn;
     private StackPane[][] cells;
+    private Button activeButton;
 
     public BoardView(Stage stage) {
         super(stage);
     }
 
-    public void initBoard(GridPane gridPane, EventHandler<MouseEvent> rectangleMouseEventHandler) {
+    public void initBoard(GridPane gridPane, HBox hBox, List<Label> labels, List<Button> buttons, EventHandler<MouseEvent> rectangleMouseEventHandler) {
         this.gridPane = gridPane;
+        this.hBox = hBox;
+        this.moveLabel = labels.get(0);
+        this.timeLabel = labels.get(1);
+        this.giveUpBtn = buttons.get(0);
+        this.menuBtn = buttons.get(1);
         this.cells = initBoard(rectangleMouseEventHandler);
+        menuBtn.setPrefWidth(giveUpBtn.getPrefWidth());
+        menuBtn.setPrefHeight(giveUpBtn.getPrefHeight());
+        menuBtn.setText("В главное меню");
+        activeButton = giveUpBtn;
     }
 
     public void placeOn(ImageView imageView, Coordinate coordinate) {
@@ -72,13 +91,16 @@ public class BoardView extends AbstractView {
     }
 
 
-    public void makeActiveCells(Coordinate chooseCoordinate, List<Coordinate> moveCoordinates, List<Coordinate> eatCoordinate) {
+    public void makeActiveCells(Coordinate chooseCoordinate, List<Coordinate> moveCoordinates, List<Coordinate> eatCoordinate, Coordinate castlingCoordinate) {
         resetBoardToDefaultState();
         if (chooseCoordinate != null) {
             makeActiveCell(chooseCoordinate.getRow(), chooseCoordinate.getColumn(), FigureActivity.CHOOSE.getCellColor());
         }
         moveCoordinates.forEach(e -> makeActiveCell(e.getRow(), e.getColumn(), FigureActivity.MOVE.getCellColor()));
         eatCoordinate.forEach(e -> makeActiveCell(e.getRow(), e.getColumn(), FigureActivity.EAT.getCellColor()));
+        if (castlingCoordinate != null) {
+            makeActiveCell(castlingCoordinate.getRow(), castlingCoordinate.getColumn(), FigureActivity.CASTLING.getCellColor());
+        }
     }
 
     public Coordinate getCoordinate(ImageView imageView) {
@@ -97,6 +119,24 @@ public class BoardView extends AbstractView {
             }
         }
         return null;
+    }
+
+    public void replaceButton() {
+        AppUtils.executeGui(() -> {
+            hBox.getChildren().remove(activeButton);
+            activeButton = (activeButton == giveUpBtn) ? menuBtn : giveUpBtn;
+            hBox.getChildren().add(activeButton);
+        });
+    }
+
+    @Override
+    public void updateMessage(String message) {
+        AppUtils.executeGui(() -> moveLabel.setText(message));
+    }
+
+    @Override
+    public void updateTime(Integer time) {
+        AppUtils.executeGui(() -> timeLabel.setText(String.valueOf(time)));
     }
 
     private void makeActiveCell(int row, int column, Paint paint) {

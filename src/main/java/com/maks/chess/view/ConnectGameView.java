@@ -5,7 +5,7 @@ import com.maks.chess.constant.StyleConstant;
 import com.maks.chess.constant.ViewConstant;
 import com.maks.chess.controller.ConnectGameController;
 import com.maks.chess.controller.Controller;
-import javafx.application.Platform;
+import com.maks.chess.util.AppUtils;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -44,7 +44,7 @@ public class ConnectGameView extends AbstractView {
     }
 
     private void setText(String message) {
-        Platform.runLater(() -> messageLabel.setText(message));
+        AppUtils.executeGui(() -> messageLabel.setText(message));
     }
 
     @Override

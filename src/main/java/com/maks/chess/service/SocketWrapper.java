@@ -45,4 +45,15 @@ public class SocketWrapper {
             logger.error("Failed serialize MoveDto");
         }
     }
+
+    public void closeConnection() {
+        try {
+            in.close();
+            out.close();
+            socket.close();
+            logger.debug("closed socket connection");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

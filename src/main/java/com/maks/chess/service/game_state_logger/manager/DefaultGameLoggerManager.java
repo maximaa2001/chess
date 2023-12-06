@@ -1,6 +1,7 @@
 package com.maks.chess.service.game_state_logger.manager;
 
 import com.maks.chess.constant.define.FigureType;
+import com.maks.chess.constant.define.LosingType;
 import com.maks.chess.model.Coordinate;
 import com.maks.chess.service.game_state_logger.GameStateLogger;
 import com.maks.chess.service.game_state_logger.reverser.LogReverser;
@@ -12,6 +13,10 @@ public class DefaultGameLoggerManager implements GameLoggerManager {
     private static final String EAT_LOG = "Вы: съедает фигуру, походив с клетки (%s:%s) на клетку (%s:%s)";
     private static final String KING_IN_DANGER_LOG = "Вы: угрожает королю";
     private static final String PAWN_ELOVLED_LOG = "Вы: пешка дошла до конца доски и становится %s";
+    private static final String CASTLING_LOG = "Вы: сделал рокировку";
+    private static final String LOSING_TIME_IS_UP_LOG = "Вы: время хода истекло";
+    private static final String LOSING_GIVE_UP_LOG = "Вы: сдался";
+    private static final String LOSING_MAT_LOG = "Вы: поставил мат";
     private final List<GameStateLogger> gameStateLoggers;
     private final LogReverser logReverser;
 
@@ -45,6 +50,23 @@ public class DefaultGameLoggerManager implements GameLoggerManager {
         String pawnEvolvedLog = String.format(PAWN_ELOVLED_LOG, type);
         log(pawnEvolvedLog);
         return logReverser.reverseLog(pawnEvolvedLog);
+    }
+
+    @Override
+    public String createCastlingLog() {
+        log(CASTLING_LOG);
+        return logReverser.reverseLog(CASTLING_LOG);
+    }
+
+    @Override
+    public String createLosingLog(LosingType type) {
+        String losingLog = switch (type) {
+            case TIME_IS_UP -> LOSING_TIME_IS_UP_LOG;
+            case GIVE_UP -> LOSING_GIVE_UP_LOG;
+            case MAT -> LOSING_MAT_LOG;
+        };
+        log(losingLog);
+        return logReverser.reverseLog(losingLog);
     }
 
     @Override

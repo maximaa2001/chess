@@ -1,14 +1,10 @@
 package com.maks.chess.service;
 
-import com.maks.chess.constant.define.FigureActivity;
-import com.maks.chess.constant.define.FigureType;
-import com.maks.chess.constant.define.GameState;
-import com.maks.chess.constant.define.GamerColor;
-import com.maks.chess.model.ChessModel;
-import com.maks.chess.model.Coordinate;
-import com.maks.chess.model.MoveDto;
-import com.maks.chess.model.PawnEvolutionDto;
+import com.maks.chess.constant.AppConstant;
+import com.maks.chess.constant.define.*;
+import com.maks.chess.model.*;
 import com.maks.chess.model.data.DataStoreFactory;
+import com.maks.chess.model.figure.Castle;
 import com.maks.chess.model.figure.Figure;
 import com.maks.chess.model.figure.King;
 import com.maks.chess.service.game_state_logger.manager.GameLoggerManager;
@@ -77,6 +73,8 @@ public class GameLogic {
         activity2Coordinate.put(FigureActivity.MOVE, accessibleMoves(from));
         activity2Coordinate.put(FigureActivity.EAT, accessibleEatFigure(from));
         activity2Coordinate.put(FigureActivity.CHOOSE, List.of(from));
+        Coordinate castlingCoordinate = accessibleCastling(from);
+        activity2Coordinate.put(FigureActivity.CASTLING, castlingCoordinate == null ? List.of() : List.of(castlingCoordinate));
         return activity2Coordinate;
     }
 
@@ -94,30 +92,72 @@ public class GameLogic {
         return chosenFigure.checkPossibilityEat(gameChessModel, from, getEnemyColor());
     }
 
+    private Coordinate accessibleCastling(Coordinate from) {
+        Figure chosenFigure = gameChessModel.getByCoordinate(from);
+        final int row = from.getRow();
+        if (chosenFigure instanceof Castle castle) {
+            if (!castle.isMoved()) {
+                Coordinate myKingCoordinate = findMyKingCoordinate(gameChessModel);
+                Figure kingFigure = gameChessModel.getByCoordinate(myKingCoordinate);
+                King king = (King) kingFigure;
+                if (!king.isMoved() && !myKingInDanger()) {
+                    if (castle.getStartCoordinate().getColumn() == 0) {
+                        for (int i = 1; i < king.getStartCoordinate().getColumn(); i++) {
+                            Figure figureByCoordinate = gameChessModel.getByCoordinate(new Coordinate(row, i));
+                            if (figureByCoordinate != null) {
+                                return null;
+                            }
+                        }
+                    } else if (castle.getStartCoordinate().getColumn() == AppConstant.BOARD_SIDE_SIZE - 1) {
+                        for (int i = castle.getStartCoordinate().getColumn(); i > 0; i--) {
+                            Figure figureByCoordinate = gameChessModel.getByCoordinate(new Coordinate(row, i));
+                            if (figureByCoordinate != null) {
+                                return null;
+                            }
+                        }
+                    }
+                    return myKingCoordinate;
+                }
+            }
+        }
+        return null;
+    }
+
     public Figure move(Coordinate from, Coordinate to) {
-        return gameChessModel.move(from, to);
+        Figure movedFigure = gameChessModel.move(from, to);
+        if (movedFigure instanceof Castle castle) {
+            castle.setMovedFlag();
+        } else if (movedFigure instanceof King king) {
+            king.setMovedFlag();
+        }
+        return movedFigure;
     }
 
     public boolean imagineMove(Coordinate from, Coordinate to) {
         ChessModel copyChessModel = gameChessModel.reverseModel();
         CoordinateTransformer coordinateTransformer = copyChessModel.getCoordinateTransformer();
         copyChessModel.move(coordinateTransformer.transform(from), coordinateTransformer.transform(to));
-        Coordinate myKingCoordinate = findMyKingCoordinate(copyChessModel);
-        Map<Coordinate, Figure> remainingFigures = copyChessModel.getRemainingFigures();
-        for (Map.Entry<Coordinate, Figure> entry : remainingFigures.entrySet()) {
-            Figure figure = entry.getValue();
-            if (figure.getColor().equals(getEnemyColor())) {
-                List<Coordinate> coordinatesAtRisk = figure.checkPossibilityEat(copyChessModel, entry.getKey(), getMyColor());
-                if (coordinatesAtRisk.contains(myKingCoordinate)) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        boolean inDanger = myKingInDanger(copyChessModel);
+        return !inDanger;
+    }
+
+    public boolean imagineCastling(Coordinate castleCoordinate, Coordinate kingCoordinate, Coordinate newKingCoordinate) {
+        ChessModel copyChessModel = gameChessModel.reverseModel();
+        CoordinateTransformer coordinateTransformer = copyChessModel.getCoordinateTransformer();
+        copyChessModel.move(coordinateTransformer.transform(kingCoordinate), coordinateTransformer.transform(newKingCoordinate));
+        copyChessModel.move(coordinateTransformer.transform(castleCoordinate), coordinateTransformer.transform(kingCoordinate));
+        boolean inDanger = myKingInDanger(copyChessModel);
+        return !inDanger;
     }
 
     public Figure eat(Coordinate from, Coordinate to) {
-        return gameChessModel.move(from, to);
+        Figure movedFigure = gameChessModel.move(from, to);
+        if (movedFigure instanceof Castle castle) {
+            castle.setMovedFlag();
+        } else if (movedFigure instanceof King king) {
+            king.setMovedFlag();
+        }
+        return movedFigure;
     }
 
     public void addFigure(Figure newFigure, Coordinate to) {
@@ -125,15 +165,36 @@ public class GameLogic {
     }
 
     public void sendToGamer(Coordinate from, Coordinate to, FigureActivity activity, List<String> logs) {
-        sendToGamer(from, to, activity, null, logs);
-    }
-
-    public void sendToGamer(Coordinate from, Coordinate to, FigureActivity activity, FigureType type, List<String> logs) {
-        boolean inDanger = checkEnemyKingInDanger(to);
+        boolean inDanger = checkEnemyKingInDangerAfterMove(to);
         if (inDanger) {
             logs.add(gameLoggerManager.createKingInDangerLog());
         }
-        socketWrapper.writeMove(new MoveDto(from, to, activity, inDanger, (type != null) ? new PawnEvolutionDto(type): null, logs));
+        sendToGamer(new Move(from, to, activity), null, null, logs);
+    }
+
+    public void sendToGamer(Coordinate from, Coordinate to, FigureActivity activity, FigureType type, List<String> logs) {
+        boolean inDanger = checkEnemyKingInDangerAfterMove(to);
+        if (inDanger) {
+            logs.add(gameLoggerManager.createKingInDangerLog());
+        }
+        sendToGamer(null, new PawnEvolution(from, to, activity, type), null, logs);
+    }
+
+    public void sendToGamer(Coordinate castleCoordinate, Coordinate oldKingCoordinate, Coordinate newKingCoordinate, List<String> logs) {
+        boolean inDanger = enemyKingInDanger();
+        if (inDanger) {
+            logs.add(gameLoggerManager.createKingInDangerLog());
+        }
+        sendToGamer(null, null, new Castling(castleCoordinate, oldKingCoordinate, newKingCoordinate), logs);
+    }
+
+    private void sendToGamer(Move move, PawnEvolution pawnEvolution, Castling castling, List<String> logs) {
+        socketWrapper.writeMove(new MoveDto(move, pawnEvolution, castling, logs, false));
+    }
+
+    public void sendToGamer(LosingType type) {
+        String losingLog = gameLoggerManager.createLosingLog(type);
+        socketWrapper.writeMove(new MoveDto(losingLog));
     }
 
     public SocketWrapper getSocketWrapper() {
@@ -153,11 +214,39 @@ public class GameLogic {
         return newFigure;
     }
 
-    private boolean checkEnemyKingInDanger(Coordinate to) {
+    private boolean checkEnemyKingInDangerAfterMove(Coordinate to) {
         Coordinate enemyKingCoordinate = findEnemyKingCoordinate(gameChessModel);
         Figure figure = gameChessModel.getByCoordinate(to);
         List<Coordinate> possibleCoordinates = figure.checkPossibilityEat(gameChessModel, to, getEnemyColor());
         return possibleCoordinates.contains(enemyKingCoordinate);
+    }
+
+
+    private boolean myKingInDanger() {
+        return myKingInDanger(gameChessModel.reverseModel());
+    }
+    private boolean myKingInDanger(ChessModel reversedChessModel) {
+        Coordinate myKingCoordinate = findMyKingCoordinate(reversedChessModel);
+        return kingInDanger(reversedChessModel, myKingCoordinate);
+    }
+
+    private boolean enemyKingInDanger() {
+        Coordinate enemyKingCoordinate = findEnemyKingCoordinate(gameChessModel);
+        return kingInDanger(gameChessModel, enemyKingCoordinate);
+    }
+
+    private boolean kingInDanger(ChessModel chessModel, Coordinate kingCoordinate) {
+        Map<Coordinate, Figure> remainingFigures = chessModel.getRemainingFigures();
+        for (Map.Entry<Coordinate, Figure> entry : remainingFigures.entrySet()) {
+            Figure figure = entry.getValue();
+            if (figure.getColor().equals(getEnemyColor())) {
+                List<Coordinate> coordinatesAtRisk = figure.checkPossibilityEat(chessModel, entry.getKey(), getMyColor());
+                if (coordinatesAtRisk.contains(kingCoordinate)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private Coordinate findMyKingCoordinate(ChessModel currentChessModel) {

@@ -2,20 +2,18 @@ package com.maks.chess.model;
 
 import com.maks.chess.constant.AppConstant;
 import com.maks.chess.constant.define.GamerColor;
+import com.maks.chess.model.figure.Castle;
 import com.maks.chess.model.figure.Figure;
 import com.maks.chess.service.initializer.FigureInitializer;
 import com.maks.chess.service.initializer.StartPositionFigureInitializer;
 import com.maks.chess.service.transformer.CoordinateTransformer;
 import com.maks.chess.service.transformer.ToEnemyCoordinateTransformer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ChessModel {
-    private static final Logger logger = LoggerFactory.getLogger(ChessModel.class);
     private final Figure[][] ALL_FIGURES = new Figure[AppConstant.BOARD_SIDE_SIZE][AppConstant.BOARD_SIDE_SIZE];
     private final CoordinateTransformer coordinateTransformer;
 
@@ -36,7 +34,6 @@ public class ChessModel {
 
     public Figure move(Coordinate from, Coordinate to) {
         Figure figure = ALL_FIGURES[from.getRow()][from.getColumn()];
-        logger.info("move {} from {} to {}", figure, from, to);
         if (figure != null) {
             ALL_FIGURES[to.getRow()][to.getColumn()] = figure;
             ALL_FIGURES[from.getRow()][from.getColumn()] = null;
