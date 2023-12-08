@@ -169,7 +169,7 @@ public class GameLogic {
         if (inDanger) {
             logs.add(gameLoggerManager.createKingInDangerLog());
         }
-        sendToGamer(new Move(from, to, activity), null, null, logs);
+        sendToGamer(new Move(from, to, activity), null, null, logs, inDanger);
     }
 
     public void sendToGamer(Coordinate from, Coordinate to, FigureActivity activity, FigureType type, List<String> logs) {
@@ -177,7 +177,7 @@ public class GameLogic {
         if (inDanger) {
             logs.add(gameLoggerManager.createKingInDangerLog());
         }
-        sendToGamer(null, new PawnEvolution(from, to, activity, type), null, logs);
+        sendToGamer(null, new PawnEvolution(from, to, activity, type), null, logs, inDanger);
     }
 
     public void sendToGamer(Coordinate castleCoordinate, Coordinate oldKingCoordinate, Coordinate newKingCoordinate, List<String> logs) {
@@ -185,11 +185,11 @@ public class GameLogic {
         if (inDanger) {
             logs.add(gameLoggerManager.createKingInDangerLog());
         }
-        sendToGamer(null, null, new Castling(castleCoordinate, oldKingCoordinate, newKingCoordinate), logs);
+        sendToGamer(null, null, new Castling(castleCoordinate, oldKingCoordinate, newKingCoordinate), logs, inDanger);
     }
 
-    private void sendToGamer(Move move, PawnEvolution pawnEvolution, Castling castling, List<String> logs) {
-        socketWrapper.writeMove(new MoveDto(move, pawnEvolution, castling, logs, false));
+    private void sendToGamer(Move move, PawnEvolution pawnEvolution, Castling castling, List<String> logs, Boolean kingInDanger) {
+        socketWrapper.writeMove(new MoveDto(move, pawnEvolution, castling, logs, false, kingInDanger));
     }
 
     public void sendToGamer(LosingType type) {
@@ -209,9 +209,34 @@ public class GameLogic {
         FigureInitializer figureInitializer = new PawnEvolutionFigureInitializer(to);
         List<Figure> figures = figureInitializer.createFigures(getMyColor());
         Figure newFigure = figures.get(0);
-        logger.info("pawn evolved in {}", newFigure.getType());
+        logger.debug("pawn evolved in {}", newFigure.getType());
         addFigure(newFigure, to);
         return newFigure;
+    }
+
+    public boolean checkMat() {
+        Map<Coordinate, Figure> remainingFigures = gameChessModel.getRemainingFigures();
+        for (Map.Entry<Coordinate, Figure> entry : remainingFigures.entrySet()) {
+            Coordinate from = entry.getKey();
+            Figure figure = entry.getValue();
+            if (figure.getColor().equals(getMyColor())) {
+                List<Coordinate> coordinates = figure.checkMoves(gameChessModel, from);
+                for (Coordinate possibleCoordinate : coordinates) {
+                    boolean isPossibleMove = imagineMove(from, possibleCoordinate);
+                    if (isPossibleMove) {
+                        return false;
+                    }
+                }
+                coordinates = figure.checkPossibilityEat(gameChessModel, from, getEnemyColor());
+                for (Coordinate possibleCoordinate : coordinates) {
+                    boolean isPossibleMove = imagineMove(from, possibleCoordinate);
+                    if (isPossibleMove) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private boolean checkEnemyKingInDangerAfterMove(Coordinate to) {
@@ -225,6 +250,7 @@ public class GameLogic {
     private boolean myKingInDanger() {
         return myKingInDanger(gameChessModel.reverseModel());
     }
+
     private boolean myKingInDanger(ChessModel reversedChessModel) {
         Coordinate myKingCoordinate = findMyKingCoordinate(reversedChessModel);
         return kingInDanger(reversedChessModel, myKingCoordinate);

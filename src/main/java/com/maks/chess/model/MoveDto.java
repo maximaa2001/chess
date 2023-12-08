@@ -9,25 +9,27 @@ public class MoveDto implements Serializable {
     private final PawnEvolution pawnEvolution;
     private final List<String> logs;
     private final Boolean endGame;
+    private final Boolean kingInDanger;
 
-    public MoveDto(Move move, PawnEvolution pawnEvolution, Castling castling, List<String> logs, Boolean endGame) {
+    public MoveDto(Move move, PawnEvolution pawnEvolution, Castling castling, List<String> logs, Boolean endGame, Boolean kingInDanger) {
         this.move = move;
         this.castling = castling;
         this.pawnEvolution = pawnEvolution;
         this.logs = logs;
         this.endGame = endGame;
+        this.kingInDanger = kingInDanger;
     }
 
-    public MoveDto(Move move, List<String> logs) {
-        this(move, null, null, logs, false);
+    public MoveDto(Move move, List<String> logs, Boolean kingInDanger) {
+        this(move, null, null, logs, false, kingInDanger);
     }
 
-    public MoveDto(Castling castling, List<String> logs) {
-        this(null, null, castling, logs, false);
+    public MoveDto(Castling castling, List<String> logs, Boolean kingInDanger) {
+        this(null, null, castling, logs, false, kingInDanger);
     }
 
     public MoveDto(String losingLog) {
-        this(null, null, null, List.of(losingLog), true);
+        this(null, null, null, List.of(losingLog), true, false);
     }
 
     public Move getMove() {
@@ -38,7 +40,7 @@ public class MoveDto implements Serializable {
         return castling;
     }
 
-    public PawnEvolution getPawnEvolutionDto() {
+    public PawnEvolution getPawnEvolution() {
         return pawnEvolution;
     }
 
@@ -48,6 +50,10 @@ public class MoveDto implements Serializable {
 
     public Boolean getEndGame() {
         return endGame;
+    }
+
+    public Boolean getKingInDanger() {
+        return kingInDanger;
     }
 
     @Override

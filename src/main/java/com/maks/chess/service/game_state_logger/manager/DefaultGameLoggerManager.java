@@ -16,7 +16,7 @@ public class DefaultGameLoggerManager implements GameLoggerManager {
     private static final String CASTLING_LOG = "Вы: сделал рокировку";
     private static final String LOSING_TIME_IS_UP_LOG = "Вы: время хода истекло";
     private static final String LOSING_GIVE_UP_LOG = "Вы: сдался";
-    private static final String LOSING_MAT_LOG = "Вы: поставил мат";
+    private static final String LOSING_MAT_LOG = "Вы: проиграл, мат";
     private final List<GameStateLogger> gameStateLoggers;
     private final LogReverser logReverser;
 

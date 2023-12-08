@@ -179,13 +179,14 @@ public class BoardController implements Controller {
             AppUtils.executeGui(() -> moveDto.getLogs().forEach(e -> gameLogic.getGameLoggerManager().log(e)));
             if (moveDto.getEndGame()) {
                 logger.debug("end game {}", moveDto);
+                gameLogic.setGameState(GameState.END_GAME);
                 timerThread.stopTimer();
                 boardView.replaceButton();
                 gameLogic.getSocketWrapper().closeConnection();
                 clearGlobalData();
             } else {
                 CoordinateTransformer coordinateTransformer = new ToEnemyCoordinateTransformer();
-                if (moveDto.getMove() != null || moveDto.getPawnEvolutionDto() != null) {
+                if (moveDto.getMove() != null || moveDto.getPawnEvolution() != null) {
                     Coordinate from;
                     Coordinate to;
                     FigureActivity activity;
@@ -196,7 +197,7 @@ public class BoardController implements Controller {
                         to = move.getTo();
                         activity = move.getActivity();
                     } else {
-                        PawnEvolution pawnEvolutionDto = moveDto.getPawnEvolutionDto();
+                        PawnEvolution pawnEvolutionDto = moveDto.getPawnEvolution();
                         logger.debug("pawnEvolution {}", pawnEvolutionDto);
                         from = pawnEvolutionDto.getFrom();
                         to = pawnEvolutionDto.getTo();
@@ -216,8 +217,8 @@ public class BoardController implements Controller {
                             boardView.eat(transformedFrom, transformedTo);
                         }
                     });
-                    if (moveDto.getPawnEvolutionDto() != null) {
-                        PawnEvolution pawnEvolutionDto = moveDto.getPawnEvolutionDto();
+                    if (moveDto.getPawnEvolution() != null) {
+                        PawnEvolution pawnEvolutionDto = moveDto.getPawnEvolution();
                         FigureFactory figureFactory = FigureFactoryCreator.createFigureFactory(gameLogic.getEnemyColor());
                         Figure figure = figureFactory.createFigure(pawnEvolutionDto.getType(), transformedTo);
                         gameLogic.addFigure(figure, transformedTo);
@@ -236,8 +237,19 @@ public class BoardController implements Controller {
                         boardView.move(transformedCastleCoordinate, transformedOldKingCoordinate);
                     });
                 }
-                gameLogic.setGameState(GameState.CHOOSE_FIGURE);
-                timerThread.resetTimer();
+                if (moveDto.getKingInDanger()) {
+                    boolean isMat = gameLogic.checkMat();
+                    if (isMat) {
+                        losing(LosingType.MAT);
+                        gameLogic.setGameState(GameState.END_GAME);
+                    } else {
+                        gameLogic.setGameState(GameState.CHOOSE_FIGURE);
+                        timerThread.resetTimer();
+                    }
+                } else {
+                    gameLogic.setGameState(GameState.CHOOSE_FIGURE);
+                    timerThread.resetTimer();
+                }
             }
         }).start();
     }
