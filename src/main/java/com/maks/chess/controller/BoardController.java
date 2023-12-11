@@ -133,8 +133,7 @@ public class BoardController implements Controller {
         String moveLog = gameLogic.getGameLoggerManager().createMoveLog(from, to);
         if (to.getRow() == 0 && movedFigure instanceof Pawn) {
             movedFigure = gameLogic.pawnAtEndBoard(to);
-            boardView.move(from, to);
-            boardView.changeOn(createImageView(movedFigure.getType(), movedFigure.getColor(), to), to);
+            boardView.moveAndPawnEvolved(from, to, createImageView(movedFigure.getType(), movedFigure.getColor(), to));
             String pawnEvolvedLog = gameLogic.getGameLoggerManager().createPawnEvolvedLog(movedFigure.getType());
             gameLogic.sendToGamer(from, to, FigureActivity.MOVE, movedFigure.getType(), new ArrayList<>(List.of(moveLog, pawnEvolvedLog)));
             logger.debug("pawn evolved");
@@ -151,8 +150,7 @@ public class BoardController implements Controller {
         String eatLog = gameLogic.getGameLoggerManager().createEatLog(from, to);
         if (to.getRow() == 0 && movedFigure instanceof Pawn) {
             movedFigure = gameLogic.pawnAtEndBoard(to);
-            boardView.eat(from, to);
-            boardView.changeOn(createImageView(movedFigure.getType(), movedFigure.getColor(), to), to);
+            boardView.eatAndPawnEvolved(from, to, createImageView(movedFigure.getType(), movedFigure.getColor(), to));
             String pawnEvolvedLog = gameLogic.getGameLoggerManager().createPawnEvolvedLog(movedFigure.getType());
             gameLogic.sendToGamer(from, to, FigureActivity.EAT, movedFigure.getType(), new ArrayList<>(List.of(eatLog, pawnEvolvedLog)));
             logger.debug("pawn evolved");
@@ -168,8 +166,7 @@ public class BoardController implements Controller {
         gameLogic.move(oldKingCoordinate, newKingCoordinate);
         gameLogic.move(castleCoordinate, oldKingCoordinate);
         String castlingLog = gameLogic.getGameLoggerManager().createCastlingLog();
-        boardView.move(oldKingCoordinate, newKingCoordinate);
-        boardView.move(castleCoordinate, oldKingCoordinate);
+        boardView.castling(castleCoordinate, oldKingCoordinate, newKingCoordinate);
         gameLogic.sendToGamer(castleCoordinate, oldKingCoordinate, newKingCoordinate, new ArrayList<>(List.of(castlingLog)));
         timerThread.resetTimer();
     }
@@ -210,19 +207,26 @@ public class BoardController implements Controller {
                     } else if (activity.equals(FigureActivity.EAT)) {
                         gameLogic.eat(transformedFrom, transformedTo);
                     }
-                    AppUtils.executeGui(() -> {
-                        if (activity.equals(FigureActivity.MOVE)) {
-                            boardView.move(transformedFrom, transformedTo);
-                        } else if (activity.equals(FigureActivity.EAT)) {
-                            boardView.eat(transformedFrom, transformedTo);
-                        }
-                    });
                     if (moveDto.getPawnEvolution() != null) {
                         PawnEvolution pawnEvolutionDto = moveDto.getPawnEvolution();
                         FigureFactory figureFactory = FigureFactoryCreator.createFigureFactory(gameLogic.getEnemyColor());
                         Figure figure = figureFactory.createFigure(pawnEvolutionDto.getType(), transformedTo);
                         gameLogic.addFigure(figure, transformedTo);
-                        AppUtils.executeGui(() -> boardView.changeOn(createImageView(pawnEvolutionDto.getType(), gameLogic.getEnemyColor(), transformedTo), transformedTo));
+                        AppUtils.executeGui(() -> {
+                            if (pawnEvolutionDto.getActivity().equals(FigureActivity.MOVE)) {
+                                boardView.moveAndPawnEvolved(transformedFrom, transformedTo, createImageView(pawnEvolutionDto.getType(), gameLogic.getEnemyColor(), transformedTo));
+                            } else if (pawnEvolutionDto.getActivity().equals(FigureActivity.EAT)) {
+                                boardView.eatAndPawnEvolved(transformedFrom, transformedTo, createImageView(pawnEvolutionDto.getType(), gameLogic.getEnemyColor(), transformedTo));
+                            }
+                        });
+                    } else {
+                        AppUtils.executeGui(() -> {
+                            if (activity.equals(FigureActivity.MOVE)) {
+                                boardView.move(transformedFrom, transformedTo);
+                            } else if (activity.equals(FigureActivity.EAT)) {
+                                boardView.eat(transformedFrom, transformedTo);
+                            }
+                        });
                     }
                 } else if (moveDto.getCastling() != null) {
                     Castling castling = moveDto.getCastling();
@@ -232,10 +236,7 @@ public class BoardController implements Controller {
                     Coordinate transformedNewKingCoordinate = coordinateTransformer.transform(castling.getNewKingCoordinate());
                     gameLogic.move(transformedOldKingCoordinate, transformedNewKingCoordinate);
                     gameLogic.move(transformedCastleCoordinate, transformedOldKingCoordinate);
-                    AppUtils.executeGui(() -> {
-                        boardView.move(transformedOldKingCoordinate, transformedNewKingCoordinate);
-                        boardView.move(transformedCastleCoordinate, transformedOldKingCoordinate);
-                    });
+                    AppUtils.executeGui(() -> boardView.castling(transformedCastleCoordinate, transformedOldKingCoordinate, transformedNewKingCoordinate));
                 }
                 if (moveDto.getKingInDanger()) {
                     boolean isMat = gameLogic.checkMat();

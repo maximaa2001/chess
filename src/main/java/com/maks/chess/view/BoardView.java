@@ -7,8 +7,12 @@ import com.maks.chess.constant.define.FigureActivity;
 import com.maks.chess.controller.BoardController;
 import com.maks.chess.controller.Controller;
 import com.maks.chess.model.Coordinate;
+import com.maks.chess.service.transformer.SizeCellTransformer;
+import com.maks.chess.service.transition.DefaultImageViewTransitionService;
+import com.maks.chess.service.transition.ImageViewTransitionService;
 import com.maks.chess.util.AppUtils;
 import com.maks.chess.util.Timer;
+import com.maks.chess.util.VoidSmth;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -32,6 +36,7 @@ public class BoardView extends AbstractView implements Timer {
     private static final URL FXML = MainApplication.class.getResource(ViewConstant.BOARD);
     private static final String LIGHT_COLOR = "#FFFFFF";
     private static final String DARK_COLOR = "#5b5b5b";
+    private static final ImageViewTransitionService imageViewTransitionService = new DefaultImageViewTransitionService(new SizeCellTransformer());
 
     private GridPane gridPane;
     private HBox hBox;
@@ -68,28 +73,42 @@ public class BoardView extends AbstractView implements Timer {
         cells[row][column].getChildren().add(imageView);
     }
 
-    public ImageView takeFrom(Coordinate from) {
-        ImageView fromImage = resolveImageView(from.getRow(), from.getColumn());
-        cells[from.getRow()][from.getColumn()].getChildren().remove(fromImage);
-        return fromImage;
-    }
-
     public void move(Coordinate from, Coordinate to) {
-        ImageView fromImage = takeFrom(from);
-        placeOn(fromImage, to);
+        VoidSmth onFinishCallback = () -> defaultMove(from, to);
+        invokeAnimationService(from, to, onFinishCallback);
     }
 
     public void eat(Coordinate from, Coordinate to) {
-        ImageView fromImage = takeFrom(from);
-        takeFrom(to);
-        placeOn(fromImage, to);
+        VoidSmth onFinishCallback = () -> defaultEat(from, to);
+        invokeAnimationService(from, to, onFinishCallback);
     }
 
-    public void changeOn(ImageView newImageView, Coordinate from) {
-        takeFrom(from);
-        placeOn(newImageView, from);
+    public void castling(Coordinate castleCoordinate, Coordinate oldKingCoordinate, Coordinate newKingCoordinate) {
+        Coordinate tempCoordinate = new Coordinate(newKingCoordinate.getRow(), (newKingCoordinate.getColumn() > oldKingCoordinate.getColumn() ? newKingCoordinate.getColumn() + 1 : newKingCoordinate.getColumn() - 1));
+        invokeAnimationService(castleCoordinate, tempCoordinate, () -> {
+            defaultMove(castleCoordinate, tempCoordinate);
+            invokeAnimationService(oldKingCoordinate, newKingCoordinate, () -> {
+                defaultMove(oldKingCoordinate, newKingCoordinate);
+                invokeAnimationService(tempCoordinate, oldKingCoordinate, () -> defaultMove(tempCoordinate, oldKingCoordinate));
+            });
+        });
     }
 
+    public void moveAndPawnEvolved(Coordinate from, Coordinate to, ImageView newImageView) {
+        VoidSmth onFinishCallback = () -> {
+            defaultMove(from, to);
+            changeOn(newImageView, to);
+        };
+        invokeAnimationService(from, to, onFinishCallback);
+    }
+
+    public void eatAndPawnEvolved(Coordinate from, Coordinate to, ImageView newImageView) {
+        VoidSmth onFinishCallback = () -> {
+            defaultEat(from, to);
+            changeOn(newImageView, to);
+        };
+        invokeAnimationService(from, to, onFinishCallback);
+    }
 
     public void makeActiveCells(Coordinate chooseCoordinate, List<Coordinate> moveCoordinates, List<Coordinate> eatCoordinate, Coordinate castlingCoordinate) {
         resetBoardToDefaultState();
@@ -137,6 +156,34 @@ public class BoardView extends AbstractView implements Timer {
     @Override
     public void updateTime(Integer time) {
         AppUtils.executeGui(() -> timeLabel.setText(String.valueOf(time)));
+    }
+
+    private ImageView takeFrom(Coordinate from) {
+        ImageView fromImage = resolveImageView(from.getRow(), from.getColumn());
+        cells[from.getRow()][from.getColumn()].getChildren().remove(fromImage);
+        return fromImage;
+    }
+
+    private void defaultMove(Coordinate from, Coordinate to) {
+        ImageView fromImage = takeFrom(from);
+        placeOn(fromImage, to);
+    }
+
+    private void defaultEat(Coordinate from, Coordinate to) {
+        ImageView fromImage = takeFrom(from);
+        takeFrom(to);
+        placeOn(fromImage, to);
+    }
+
+    private void changeOn(ImageView newImageView, Coordinate from) {
+        takeFrom(from);
+        placeOn(newImageView, from);
+    }
+
+    private void invokeAnimationService(Coordinate from, Coordinate to, VoidSmth onFinishCallback) {
+        cells[from.getRow()][from.getColumn()].toFront();
+        ImageView imageView = resolveImageView(from.getRow(), from.getColumn());
+        imageViewTransitionService.transition(imageView, from, to, onFinishCallback);
     }
 
     private void makeActiveCell(int row, int column, Paint paint) {

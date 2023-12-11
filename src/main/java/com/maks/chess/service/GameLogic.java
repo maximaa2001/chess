@@ -109,7 +109,7 @@ public class GameLogic {
                             }
                         }
                     } else if (castle.getStartCoordinate().getColumn() == AppConstant.BOARD_SIDE_SIZE - 1) {
-                        for (int i = castle.getStartCoordinate().getColumn(); i > 0; i--) {
+                        for (int i = castle.getStartCoordinate().getColumn() - 1; i > king.getStartCoordinate().getColumn(); i--) {
                             Figure figureByCoordinate = gameChessModel.getByCoordinate(new Coordinate(row, i));
                             if (figureByCoordinate != null) {
                                 return null;
